@@ -210,11 +210,14 @@
       function zTreeOnClick(event, treeId, treeNode) {       //第二步
             var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
                 nodes = treeObj.getCheckedNodes(true),
-                v = "";
+               arrList = new Array();
             for (var i = 0; i < nodes.length; i++) {
-                v += nodes[i].name + ",";
-                console.log("节点id:" + nodes[i].id + "节点名称" + v); //获取选中节点的值
-            }}
+               if(nodes[i].id == undefined){
+               }else {
+                   arrList.push(nodes[i].id)
+               }
+            } alert(arrList)
+      }
 
     function getOptionList(){
           $.ajaxSettings.async = false
@@ -229,40 +232,44 @@
            $.ajaxSettings.async = true
     };
 
+       $('.modal-footer').children('.btn-success').click(function () {
+           zTreeOnClick()
+       })
 
-    function checkedzTreeNodes() {
-			var treeObj = $.fn.zTree.init($("#treeDemo"),setting,zNodes);
-			var zTree = treeObj.getCheckedNodes(false); // 获取未被选中的shu
-			var arr = new Array();
-			var id= "";
-			$.ajax({
-				url : "/SyncData.do",
-				type: "post",
-				dataType : "json",
-				async : false,
-				success : function(data, textStatus) {
-					if (data.result && data.code == 1) {
-						id = data.ids;
-					}
-				},
-				error : function(XMLHttpRequest, textStatus, errorThrown){
-				}
-			});
-			if ( id!= "") {
-				var idarr = id.split(",");
-				for (var i = 0; i < zTree.length; i++) {
-					for (var j = 0; j < idarr .length; j++) {
-						if (idarr[j] == zTree[i].id) {
-							arr.push(zTree[i]);
-						}
-					}
-				}
-				for (var l = 0; l < arr.length;l++){
-					treeObj.expandNode(arr[l], true,true,true); //展开选中的
-					treeObj.checkNode(arr[l], true,true);// 选中
-				}
-			}
-		}
+
+    {#function checkedzTreeNodes() {#}
+	{#		var treeObj = $.fn.zTree.init($("#treeDemo"),setting,zNodes);#}
+	{#		var zTree = treeObj.getCheckedNodes(false); // 获取未被选中的shu#}
+	{#		var arr = new Array();#}
+	{#		var id= "";#}
+	{#		$.ajax({#}
+	{#			url : "/SyncData.do",#}
+	{#			type: "post",#}
+	{#			dataType : "json",#}
+	{#			async : false,#}
+	{#			success : function(data, textStatus) {#}
+	{#				if (data.result && data.code == 1) {#}
+	{#					id = data.ids;#}
+	{#				}#}
+	{#			},#}
+	{#			error : function(XMLHttpRequest, textStatus, errorThrown){#}
+	{#			}#}
+	{#		});#}
+	{#		if ( id!= "") {#}
+	{#			var idarr = id.split(",");#}
+	{#			for (var i = 0; i < zTree.length; i++) {#}
+	{#				for (var j = 0; j < idarr .length; j++) {#}
+	{#					if (idarr[j] == zTree[i].id) {#}
+	{#						arr.push(zTree[i]);#}
+	{#					}#}
+	{#				}#}
+	{#			}#}
+	{#			for (var l = 0; l < arr.length;l++){#}
+	{#				treeObj.expandNode(arr[l], true,true,true); //展开选中的#}
+	{#				treeObj.checkNode(arr[l], true,true);// 选中#}
+	{#			}#}
+	{#		}#}
+	{#	}#}
 
 
     {#$("[title='新建']").click(function () {#}

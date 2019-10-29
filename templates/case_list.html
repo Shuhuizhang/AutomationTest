@@ -147,6 +147,14 @@
 </div>
 
 <script>
+    $("[title='新建']").click(function () {
+         $('#caseid').val('')
+        $('#name').val('')
+        $('#clazz').val('')
+        $('#method').val('')
+        $('#remark').val('')
+    });
+
     $('.case').children('.text-center').children('button').click(function () {
         $('#caseid').val($(this).parents('tr').find('.field1').text())
         $('#name').val($(this).parents('tr').find('.field2').text())

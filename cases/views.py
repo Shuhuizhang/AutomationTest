@@ -97,22 +97,22 @@ class OptionlistView(View):
     """获取全部的用例选项"""
 
     def get(self, request):
-        option_list = []
         module_list = Case.objects.values('module').distinct()
-
         print(module_list)
         module = []
-        for i in module_list:
-            module.append({'name': i['module'], 'children': {'name': 'test_rfq_22', 'children': {}}})
+        for m in module_list:
+            module.append({'name': m['module'], 'children': []})
         print(module)
-        # clazz_list = Case.objects.values('')
-        # #     j = j + 1
-        # cases_list = Case.objects.all()
-        # clazz_list = []
-        # for k in cases_list:
-        #    for c in module:
-        #        if k['module'] == c['name']:
-        #            clazz_list.append({})
-
-
+        clazz_list = Case.objects.values('module', 'clazz')
+        for c in clazz_list:
+            for m in module:
+                if c['module'] == m['name']:
+                    if not {'name': c['clazz'], 'children': []} in m['children']:
+                        m['children'].append({'name': c['clazz'], 'children': []})
+        method_list = Case.objects.values('id', 'clazz', 'method')
+        for i in method_list:
+            for k in module:
+                for j in k['children']:
+                        if i['clazz'] == j['name']:
+                            j['children'].append({'name': i['method'], 'id': i['id']})
         return JsonResponse({'status': True, 'option': module})
