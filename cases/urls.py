@@ -16,12 +16,13 @@ Including another URLconf
 from django.conf.urls import url
 
 
-from cases.views import IndexView, HomeView, CaseListView, PlanListView, SaveCaseView
+from cases.views import IndexView, HomeView, CaseListView, PlanListView, SaveCaseView, OptionlistView
 
 urlpatterns = [
     url(r'^index$', IndexView.as_view(), name='index'),
     url(r'^home$', HomeView.as_view(), name='home'),
     url(r'^case_list/(?P<page>\d+)$', CaseListView.as_view(), name='case_list'),
     url(r'^plan_list/(?P<page>\d+)$', PlanListView.as_view(), name='plan_list'),
-    url(r'^save$', SaveCaseView.as_view(), name='save')
+    url(r'^save$', SaveCaseView.as_view(), name='save'),
+    url(r'^option_list$', OptionlistView.as_view(), name='option')
 ]

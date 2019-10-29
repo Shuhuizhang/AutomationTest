@@ -92,3 +92,27 @@ class SaveCaseView(View):
         else:
             Case.objects.create(module=module, clazz=clazz, method=method, remark=remark)
             return JsonResponse({'status': True, 'msg': '保存成功'})
+
+class OptionlistView(View):
+    """获取全部的用例选项"""
+
+    def get(self, request):
+        option_list = []
+        module_list = Case.objects.values('module').distinct()
+
+        print(module_list)
+        module = []
+        for i in module_list:
+            module.append({'name': i['module'], 'children': {'name': 'test_rfq_22', 'children': {}}})
+        print(module)
+        # clazz_list = Case.objects.values('')
+        # #     j = j + 1
+        # cases_list = Case.objects.all()
+        # clazz_list = []
+        # for k in cases_list:
+        #    for c in module:
+        #        if k['module'] == c['name']:
+        #            clazz_list.append({})
+
+
+        return JsonResponse({'status': True, 'option': module})

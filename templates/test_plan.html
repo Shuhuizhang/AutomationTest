@@ -9,13 +9,15 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
     <link rel="stylesheet" href=" {% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href=" {% static 'css/bootstrapStyle/bootstrapStyle.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'plugins/adminLTE/css/AdminLTE.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/adminLTE/css/skins/_all-skins.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 	<script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
     <script src="{% static 'plugins/bootstrap/js/bootstrap.min.js' %}"></script>
-
-
+    <link type="text/css" rel="stylesheet" href=" {% static 'css/zTreeStyle/zTreeStyle.css' %}">
+    <script type="text/javascript" src=" {% static 'js/jquery.ztree.core.js' %}"></script>
+    <script type="text/javascript" src=" {% static 'js/jquery.ztree.excheck.js' %}"></script>
 
 </head>
 
@@ -131,8 +133,7 @@
 		      		<td>选择用例</td>
 		      		<td>
 		      			<div class="btn-group">
-
-                                                                    
+                           <ul id="treeDemo" class="ztree"></ul>
                         </div>
 
 						</table>	
@@ -152,5 +153,123 @@
 </div>
     
 </body>
+<SCRIPT type="text/javascript">
+        <!--
+        var setting = {
+            view: {
+                selectedMulti: false
+            },
+            check: {
+                enable: true,
+
+            },
+            data: {
+                simpleData: {
+                    enable: false
+                }
+            },
+            callback:{    //第一步
+                beforeCheck:true,
+                onClick:zTreeOnClick
+            }
+
+
+        };
+
+        var zNodes =[
+		]
+
+
+
+
+
+        $(document).ready(function(){
+            getOptionList();
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+        });
+
+        var newCount = 1;
+        function addHoverDom(treeId, treeNode) {
+            var sObj = $("#" + treeNode.tId + "_span");
+            if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+            var addStr = "<span class='button add' id='addBtn_" + treeNode.tId
+                + "' title='add node' onfocus='this.blur();'></span>";
+            sObj.after(addStr);
+            var btn = $("#addBtn_"+treeNode.tId);
+            if (btn) btn.bind("click", function(){
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                zTree.addNodes(treeNode, {id:(100 + newCount), pId:treeNode.id, name:"new node" + (newCount++)});
+                return false;
+            });
+        };
+        function removeHoverDom(treeId, treeNode) {
+            $("#addBtn_"+treeNode.tId).unbind().remove();
+        };
+        //-->
+
+      function zTreeOnClick(event, treeId, treeNode) {       //第二步
+            var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
+                nodes = treeObj.getCheckedNodes(true),
+                v = "";
+            for (var i = 0; i < nodes.length; i++) {
+                v += nodes[i].name + ",";
+                console.log("节点id:" + nodes[i].id + "节点名称" + v); //获取选中节点的值
+            }}
+
+    function getOptionList(){
+          $.ajaxSettings.async = false
+          $.get('/cases/option_list', function(data){
+                if (data.status){
+                    zNodes = data.option
+
+                }else{
+                    alert("请求失败")
+                }
+          })
+           $.ajaxSettings.async = true
+    };
+
+
+    function checkedzTreeNodes() {
+			var treeObj = $.fn.zTree.init($("#treeDemo"),setting,zNodes);
+			var zTree = treeObj.getCheckedNodes(false); // 获取未被选中的shu
+			var arr = new Array();
+			var id= "";
+			$.ajax({
+				url : "/SyncData.do",
+				type: "post",
+				dataType : "json",
+				async : false,
+				success : function(data, textStatus) {
+					if (data.result && data.code == 1) {
+						id = data.ids;
+					}
+				},
+				error : function(XMLHttpRequest, textStatus, errorThrown){
+				}
+			});
+			if ( id!= "") {
+				var idarr = id.split(",");
+				for (var i = 0; i < zTree.length; i++) {
+					for (var j = 0; j < idarr .length; j++) {
+						if (idarr[j] == zTree[i].id) {
+							arr.push(zTree[i]);
+						}
+					}
+				}
+				for (var l = 0; l < arr.length;l++){
+					treeObj.expandNode(arr[l], true,true,true); //展开选中的
+					treeObj.checkNode(arr[l], true,true);// 选中
+				}
+			}
+		}
+
+
+    {#$("[title='新建']").click(function () {#}
+    {#    getOptionList();#}
+
+
+
+    </SCRIPT>
 
 </html>
