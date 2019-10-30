@@ -5,7 +5,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.generic import View
 
-from cases.models import Case, Testplan
+from cases.models import Case, Testplan, Caseplan
 
 
 class IndexView(View):
@@ -116,3 +116,37 @@ class OptionlistView(View):
                         if i['clazz'] == j['name']:
                             j['children'].append({'name': i['method'], 'id': i['id']})
         return JsonResponse({'status': True, 'option': module})
+
+
+class CreateTestPlanView(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        _id = request.POST.get('id')
+        name = request.POST.get('name')
+        module = request.POST.get('module')
+        report = request.POST.get('report')
+        remark = request.POST.get('remark')
+        case_id_list = str(request.POST.get('case_id_list'))
+        if not _id:
+            if case_id_list:
+                plan = Testplan(name=name, module=module, report=report, remark=remark)
+                plan.save()
+                for i in case_id_list.split(','):
+                    if i:
+                        Caseplan.objects.create(case_id=int(i), plan_id=plan.id)
+            else:
+                return JsonResponse({'status': False, 'msg': " test case not be null"})
+            return JsonResponse({'status': True, 'msg': "新增计划成功"})
+
+
+class RunPlanView(View):
+
+    def get(self, request, planid):
+        planid = int(planid) + 1
+        plan = Caseplan.objects.filter(plan_id=planid)
+        for i in plan:
+        
+        return JsonResponse({'status': True, 'msg': "成功"})

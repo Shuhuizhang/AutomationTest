@@ -23,7 +23,7 @@
 
 <body class="hold-transition skin-red sidebar-mini" >
   <!-- .box-body -->
-                
+                 {% csrf_token %}
                     <div class="box-header with-border">
                         <h3 class="box-title">测试任务管理</h3>
                     </div>
@@ -76,7 +76,8 @@
 									      <td>{{ plan.remark }}</td>
 		                                  <td class="text-center">                                           
 		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" >修改</button>                                           
-		                                  </td>
+                                              <a id="run" type="button" class="btn bg-olive btn-xs"  href="/cases/run_plan/{{ plan.id }}"  >运行</a>
+                                          </td>
 			                          </tr>
                                   {% endfor %}
 			                      </tbody>
@@ -107,26 +108,30 @@
 		<div class="modal-body">							
 			
 			<table class="table table-bordered table-striped"  width="800px">
+                 <tr style="display:none;">
+		      		<td>任务ID</td>
+		      		<td><input id="planId" class="form-control" placeholder="任务ID" >  </td>
+		      	</tr>
 		      	<tr>
 		      		<td>任务名称</td>
-		      		<td><input  class="form-control" placeholder="任务名称">  </td>
+		      		<td><input id="name" class="form-control" placeholder="任务名称">  </td>
 		      	</tr>			   
 		      	<tr>
 		      		<td>模块</td>
 		      		<td>
-		      			<input  class="form-control" placeholder="模块">  </td>
+		      			<input  id="module" class="form-control" placeholder="模块">  </td>
 		      		</td>
 		      	</tr>
 		      	<tr>
 		      		<td>报告</td>
 		      		<td>
-                        <input  class="form-control" placeholder="报告">  </td>
+                        <input id="report" class="form-control" placeholder="报告">  </td>
 		      		</td>
 		      	</tr>	
 		      	<tr>
 		      		<td>备注</td>
 		      		<td>
-                        <input  class="form-control" placeholder="备注">  </td>
+                        <input id="remark" class="form-control" placeholder="备注">  </td>
 		      		</td>
 		      	</tr>
 		      	<tr>
@@ -210,13 +215,14 @@
       function zTreeOnClick(event, treeId, treeNode) {       //第二步
             var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
                 nodes = treeObj.getCheckedNodes(true),
-               arrList = new Array();
+              v = ''
             for (var i = 0; i < nodes.length; i++) {
                if(nodes[i].id == undefined){
                }else {
-                   arrList.push(nodes[i].id)
+                  v = v + nodes[i].id +","
                }
-            } alert(arrList)
+            }
+          return v
       }
 
     function getOptionList(){
@@ -233,7 +239,25 @@
     };
 
        $('.modal-footer').children('.btn-success').click(function () {
-           zTreeOnClick()
+           csrf = $('input[name="csrfmiddlewaretoken"]').val()
+           plan_name = $('#name').val()
+           plan_id = $('#planId').val()
+           report = $('#report').val()
+           remark  = $('#remark').val()
+           module = $('#module').val()
+           case_list = zTreeOnClick()
+           params = {'id':plan_id, 'name': plan_name, 'module': module, 'report': report, 'remark': remark,
+               'case_id_list': case_list, 'csrfmiddlewaretoken': csrf,}
+           $.ajaxSettings.async = false
+           $.post('/cases/create_plan',params, function (data) {
+               if (data.status){
+                    window.location.reload()
+               }else{
+                   alert(data.msg)
+               }
+           })
+            $.ajaxSettings.async = true
+
        })
 
 
@@ -275,6 +299,22 @@
     {#$("[title='新建']").click(function () {#}
     {#    getOptionList();#}
 
+    {#$('#run').click(function () {#}
+    {#    plan_id = this.attr('plan_id')#}
+    {#    alert(plan_id)#}
+    {#    csrf = $('input[name="csrfmiddlewaretoken"]').val()#}
+    {#    params = {'csrfmiddlewaretoken': csrf, 'planid': plan_id}#}
+    {#     $.ajaxSettings.async = false#}
+    {#    $.get('/cases/run_plan',params,function (data) {#}
+    {#        if(data.status){#}
+    {#            alert("测试任务运行中")#}
+    {#        }else{#}
+    {#            alert("请求失败")#}
+    {#        }#}
+    {#    })#}
+    {##}
+    {#    $.ajaxSettings.async = true#}
+    {#})#}
 
 
     </SCRIPT>

@@ -16,7 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 
 
-from cases.views import IndexView, HomeView, CaseListView, PlanListView, SaveCaseView, OptionlistView
+from cases.views import IndexView, HomeView, CaseListView, PlanListView, SaveCaseView, OptionlistView, \
+    CreateTestPlanView, RunPlanView
 
 urlpatterns = [
     url(r'^index$', IndexView.as_view(), name='index'),
@@ -24,5 +25,7 @@ urlpatterns = [
     url(r'^case_list/(?P<page>\d+)$', CaseListView.as_view(), name='case_list'),
     url(r'^plan_list/(?P<page>\d+)$', PlanListView.as_view(), name='plan_list'),
     url(r'^save$', SaveCaseView.as_view(), name='save'),
-    url(r'^option_list$', OptionlistView.as_view(), name='option')
+    url(r'^option_list$', OptionlistView.as_view(), name='option'),
+    url(r'^create_plan$', CreateTestPlanView.as_view(), name='create_plan'),
+    url(r'^run_plan/(?P<planid>\d+)$', RunPlanView.as_view(), name='run_plan'),
 ]
