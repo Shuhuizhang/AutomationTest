@@ -1,3 +1,6 @@
+import json
+
+import requests
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -91,7 +94,7 @@ class SaveCaseView(View):
             return JsonResponse({'status': True, 'msg': '保存成功'})
         else:
             Case.objects.create(module=module, clazz=clazz, method=method, remark=remark)
-            return JsonResponse({'status': True, 'msg': '保存成功'})
+            return JsonResponse({'status': True, 'msg': '保存成功'},json_dumps_params={'ensure_ascii': False})
 
 class OptionlistView(View):
     """获取全部的用例选项"""
@@ -115,7 +118,7 @@ class OptionlistView(View):
                 for j in k['children']:
                         if i['clazz'] == j['name']:
                             j['children'].append({'name': i['method'], 'id': i['id']})
-        return JsonResponse({'status': True, 'option': module})
+        return JsonResponse({'status': True, 'option': module}, json_dumps_params={'ensure_ascii': False})
 
 
 class CreateTestPlanView(View):
@@ -139,14 +142,24 @@ class CreateTestPlanView(View):
                         Caseplan.objects.create(case_id=int(i), plan_id=plan.id)
             else:
                 return JsonResponse({'status': False, 'msg': " test case not be null"})
-            return JsonResponse({'status': True, 'msg': "新增计划成功"})
+            return JsonResponse({'status': True, 'msg': "新增计划成功"}, json_dumps_params={'ensure_ascii': False})
 
 
 class RunPlanView(View):
 
     def get(self, request, planid):
         planid = int(planid) + 1
-        plan = Caseplan.objects.filter(plan_id=planid)
-        for i in plan:
-        
-        return JsonResponse({'status': True, 'msg': "成功"})
+        params = {'test_list': []}
+        plan_case = Caseplan.objects.filter(plan_id=planid)
+        plan = Testplan.objects.filter(id=planid)[0]
+        params['id'] = plan.id
+        params['name'] = plan.name
+        for i in plan_case:
+            case = Case.objects.filter(id=i.case_id)[0]
+            params['test_list'].append({'module': case.module, 'clazz': case.clazz, 'method': case.method})
+        print(params)
+        headers = {
+            "Content-Type": "application/json;charset=UTF-8"}
+        r = requests.post('http://127.0.0.1:5000/execute_test_plan', data=json.dumps(params), verify=False, headers=headers)
+        print(r.text)
+        return JsonResponse({'status': True, 'msg': "请求运行成功，等待运行结果"}, json_dumps_params={'ensure_ascii': False})

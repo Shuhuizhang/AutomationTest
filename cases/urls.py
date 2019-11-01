@@ -28,4 +28,5 @@ urlpatterns = [
     url(r'^option_list$', OptionlistView.as_view(), name='option'),
     url(r'^create_plan$', CreateTestPlanView.as_view(), name='create_plan'),
     url(r'^run_plan/(?P<planid>\d+)$', RunPlanView.as_view(), name='run_plan'),
+
 ]

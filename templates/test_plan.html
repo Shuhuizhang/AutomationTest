@@ -76,7 +76,7 @@
 									      <td>{{ plan.remark }}</td>
 		                                  <td class="text-center">                                           
 		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" >修改</button>                                           
-                                              <a id="run" type="button" class="btn bg-olive btn-xs"  href="/cases/run_plan/{{ plan.id }}"  >运行</a>
+                                              <button id="run" type="button" class="btn bg-olive btn-xs"  run_plan_id="{{ plan.id }}"  >运行</button>
                                           </td>
 			                          </tr>
                                   {% endfor %}
@@ -299,22 +299,19 @@
     {#$("[title='新建']").click(function () {#}
     {#    getOptionList();#}
 
-    {#$('#run').click(function () {#}
-    {#    plan_id = this.attr('plan_id')#}
-    {#    alert(plan_id)#}
-    {#    csrf = $('input[name="csrfmiddlewaretoken"]').val()#}
-    {#    params = {'csrfmiddlewaretoken': csrf, 'planid': plan_id}#}
-    {#     $.ajaxSettings.async = false#}
-    {#    $.get('/cases/run_plan',params,function (data) {#}
-    {#        if(data.status){#}
-    {#            alert("测试任务运行中")#}
-    {#        }else{#}
-    {#            alert("请求失败")#}
-    {#        }#}
-    {#    })#}
-    {##}
-    {#    $.ajaxSettings.async = true#}
-    {#})#}
+   $('.text-center').children('#run').click(function () {
+       plan = this.getAttribute('run_plan_id')
+       url = '/cases/run_plan/' + plan
+       $.ajaxSettings.async = false
+       $.get(url, function (data) {
+           if(data.status){
+               alert(data.msg)
+           }else {
+               alert("请求失败")
+           }
+       })
+
+   });
 
 
     </SCRIPT>
