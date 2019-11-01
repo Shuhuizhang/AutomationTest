@@ -41,3 +41,7 @@ class Caseplan(BaseModel):
         db_table = 'tb_plan_case'
         verbose_name = '测试任务用例'
         verbose_name_plural = verbose_name
+
+
+# class Report(BaseModel):
+#     plan_id = models.ForeignKey('cases.Testplan', verbose_name='测试任务ID')

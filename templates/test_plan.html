@@ -69,7 +69,7 @@
 			                      <tbody>
                                   {% for plan in plan_list %}
 			                          <tr>
-			                              <td><input  type="checkbox"></td>
+			                              <td><input  type="checkbox" name="plancheck" class="icheckbox" pid="{{ plan.id }}"></td>
 									      <td>{{ plan.name }}</td>
 									      <td>{{ plan.module }}</td>
 									      <td>{{ plan.report }}</td>
@@ -313,6 +313,26 @@
 
    });
 
+   $("[title='删除']").click(function () {
+        vc = '',
+        $.each($(":checked"),function () {
+            vc = vc + this.getAttribute('pid')+","
+        })
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        params = {'plan_id': vc, 'csrfmiddlewaretoken': csrf, }
+
+        $.ajaxSettings.async = false
+
+       $.post('/cases/del_plan',params,function (data) {
+           if(data.status){
+               alert("删除成功")
+                window.location.reload()
+           }else{
+               alert("删除失败")
+           }
+       })
+       $.ajaxSettings.async = true
+   })
 
     </SCRIPT>
 

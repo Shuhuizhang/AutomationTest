@@ -69,7 +69,7 @@ class PlanListView(View):
     """测试计划"""
 
     def get(self, request, page):
-        plan_list = Testplan.objects.all().order_by("-id")
+        plan_list = Testplan.objects.filter(is_del=0).order_by('-id')
         return render(request, 'test_plan.html', {'plan_list': plan_list})
 
 
@@ -94,7 +94,7 @@ class SaveCaseView(View):
             return JsonResponse({'status': True, 'msg': '保存成功'})
         else:
             Case.objects.create(module=module, clazz=clazz, method=method, remark=remark)
-            return JsonResponse({'status': True, 'msg': '保存成功'},json_dumps_params={'ensure_ascii': False})
+            return JsonResponse({'status': True, 'msg': '保存成功'}, json_dumps_params={'ensure_ascii': False})
 
 class OptionlistView(View):
     """获取全部的用例选项"""
@@ -145,10 +145,29 @@ class CreateTestPlanView(View):
             return JsonResponse({'status': True, 'msg': "新增计划成功"}, json_dumps_params={'ensure_ascii': False})
 
 
+class DelPlanView(View):
+
+    def post(self, request):
+        plan_id = request.POST.get('plan_id')
+        if plan_id:
+            for i in str(plan_id).split(','):
+                if i:
+                    try:
+                        plan = Testplan.objects.get(id=i)
+                        plan.is_del = 1
+                        plan.save()
+                        Caseplan.objects.filter(plan_id=i).update(is_del=1)
+                    except:
+                        return JsonResponse({'status': False, 'msg': "删除测试任务失败"}, json_dumps_params={'ensure_ascii': False})
+            return JsonResponse({'status': True, 'msg': "删除测试任务成功"}, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({'status': False, 'msg': "操作失败"}, json_dumps_params={'ensure_ascii': False})
+
+
 class RunPlanView(View):
 
     def get(self, request, planid):
-        planid = int(planid) + 1
+        planid = int(planid)
         params = {'test_list': []}
         plan_case = Caseplan.objects.filter(plan_id=planid)
         plan = Testplan.objects.filter(id=planid)[0]
@@ -162,4 +181,8 @@ class RunPlanView(View):
             "Content-Type": "application/json;charset=UTF-8"}
         r = requests.post('http://127.0.0.1:5000/execute_test_plan', data=json.dumps(params), verify=False, headers=headers)
         print(r.text)
-        return JsonResponse({'status': True, 'msg': "请求运行成功，等待运行结果"}, json_dumps_params={'ensure_ascii': False})
+        res = json.loads(r.text)
+        if res['code'] == 200:
+            return JsonResponse({'status': True, 'msg': "请求运行成功，等待运行结果"}, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({'status': False, 'msg': res['message']}, json_dumps_params={'ensure_ascii': False})
