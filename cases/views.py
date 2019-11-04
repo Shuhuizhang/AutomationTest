@@ -8,7 +8,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.generic import View
 
-from cases.models import Case, Testplan, Caseplan
+from cases.models import Case, Testplan, Caseplan, Report
 
 
 class IndexView(View):
@@ -27,11 +27,11 @@ class HomeView(View):
 class CaseListView(View):
     """测试用例列表"""
 
-    def get(self, request,page):
+    def get(self, request, page):
         case_list = Case.objects.all().order_by("-id")
         print(case_list)
         # 分页
-        paginator = Paginator(case_list, 1)
+        paginator = Paginator(case_list, 15, 14)
         # 获取第page页的内容
         try:
             page = int(page)
@@ -44,7 +44,6 @@ class CaseListView(View):
         # 获取第page页的Page实例对象
         cases_page = paginator.page(page)
         num_pages = paginator.num_pages
-
         if num_pages < 5:
             pages = range(1, num_pages + 1)
         elif page <= 3:
@@ -54,13 +53,10 @@ class CaseListView(View):
         else:
             pages = range(page - 2, page + 3)
 
-        context = {'casea_page': cases_page,
+        context = {'cases_page': cases_page,
                    'pages': pages,
                    'page': 'case',
                    'case_list': case_list}
-        print(context)
-        for i in context['casea_page']:
-            print(i)
 
         return render(request, 'case_list.html', context)
 
@@ -70,6 +66,12 @@ class PlanListView(View):
 
     def get(self, request, page):
         plan_list = Testplan.objects.filter(is_del=0).order_by('-id')
+        for i in plan_list:
+            try:
+                report = Report.objects.filter(plan_id=i.id).order_by('-id')[0]
+                i.report = report.report_url
+            except:
+                i.report = ''
         return render(request, 'test_plan.html', {'plan_list': plan_list})
 
 
@@ -101,11 +103,9 @@ class OptionlistView(View):
 
     def get(self, request):
         module_list = Case.objects.values('module').distinct()
-        print(module_list)
         module = []
         for m in module_list:
             module.append({'name': m['module'], 'children': []})
-        print(module)
         clazz_list = Case.objects.values('module', 'clazz')
         for c in clazz_list:
             for m in module:
@@ -142,7 +142,27 @@ class CreateTestPlanView(View):
                         Caseplan.objects.create(case_id=int(i), plan_id=plan.id)
             else:
                 return JsonResponse({'status': False, 'msg': " test case not be null"})
-            return JsonResponse({'status': True, 'msg': "新增计划成功"}, json_dumps_params={'ensure_ascii': False})
+            return JsonResponse({'status': True, 'msg': "操作成功"}, json_dumps_params={'ensure_ascii': False})
+
+        else:
+            old = []
+            new = case_id_list.split(',')
+            Testplan.objects.filter(id=_id).update(name=name, module=module, report=report, remark=remark)
+            if case_id_list:
+                case_list = Caseplan.objects.filter(plan_id=_id, is_del=0)
+                for c in case_list:
+                    old.append(str(c.case_id))
+                intersection = set(new).intersection(set(old))
+                need_insert = set(new).symmetric_difference(intersection)
+                need_del = set(old).symmetric_difference(intersection)
+                for cid in need_insert:
+                    if cid:
+                        Caseplan.objects.create(case_id=int(cid), plan_id=int(_id))
+                for id in need_del:
+                    if id:
+                        Caseplan.objects.filter(case_id=id).update(is_del=1)
+
+            return JsonResponse({'status': True, 'msg': "操作成功"}, json_dumps_params={'ensure_ascii': False})
 
 
 class DelPlanView(View):
@@ -164,13 +184,32 @@ class DelPlanView(View):
             return JsonResponse({'status': False, 'msg': "操作失败"}, json_dumps_params={'ensure_ascii': False})
 
 
+class PlanDetailView(View):
+    """查询用例详情"""
+
+    def post(self, request):
+        plan_id = int(request.POST.get('plan_id'))
+        if plan_id:
+                plan = Testplan.objects.get(id=plan_id)
+                re_plan = {'id': plan.id, 'name': plan.name, 'module':plan.module, 'remark': plan.remark,
+                           'report': plan.report, 'cases_list': []}
+                case_list = Caseplan.objects.filter(plan_id=plan.id, is_del=0).values('case_id')
+                for i in case_list:
+                    re_plan['cases_list'].append(i['case_id'])
+                print(re_plan)
+                return JsonResponse({'status': True, 'plan': re_plan}, json_dumps_params={'ensure_ascii': False})
+
+
+
+
+
 class RunPlanView(View):
 
-    def get(self, request, planid):
-        planid = int(planid)
+    def get(self, request, plan_id):
+        plan_id = int(plan_id)
         params = {'test_list': []}
-        plan_case = Caseplan.objects.filter(plan_id=planid)
-        plan = Testplan.objects.filter(id=planid)[0]
+        plan_case = Caseplan.objects.filter(plan_id=plan_id)
+        plan = Testplan.objects.filter(id=plan_id)[0]
         params['id'] = plan.id
         params['name'] = plan.name
         for i in plan_case:
@@ -186,3 +225,27 @@ class RunPlanView(View):
             return JsonResponse({'status': True, 'msg': "请求运行成功，等待运行结果"}, json_dumps_params={'ensure_ascii': False})
         else:
             return JsonResponse({'status': False, 'msg': res['message']}, json_dumps_params={'ensure_ascii': False})
+
+
+class TestReportView(View):
+
+    def get(self, request, page):
+        re_list = []
+        reports = Report.objects.filter(is_del=0).order_by('-id')
+        for i in reports:
+            plan = Testplan.objects.get(id=i.plan_id)
+            re_list.append({'plan': plan.name, 'id': i.id, 'report_url': i.report_url})
+        return render(request, 'report_list.html', {'report_list': re_list})
+
+
+class SaveReportView(View):
+
+    def post(self, request):
+        _id = request.POST.get('id')
+        plan_id = request.POST.get('plan_id')
+        url = request.POST.get('report_url')
+        if not all([plan_id, url]):
+            return JsonResponse({'status': False, 'msg': '保存失败，参数不完整'}, json_dumps_params={'ensure_ascii': False})
+        if not _id:
+            Report.objects.create(plan_id=plan_id, report_url=url)
+            return JsonResponse({'status': False, 'msg': '保存成功'}, json_dumps_params={'ensure_ascii': False})

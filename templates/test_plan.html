@@ -72,10 +72,10 @@
 			                              <td><input  type="checkbox" name="plancheck" class="icheckbox" pid="{{ plan.id }}"></td>
 									      <td>{{ plan.name }}</td>
 									      <td>{{ plan.module }}</td>
-									      <td>{{ plan.report }}</td>
+									      <td><a href="{{ plan.report }} " target="_blank">{{ plan.report }}</a></td>
 									      <td>{{ plan.remark }}</td>
 		                                  <td class="text-center">                                           
-		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal" >修改</button>                                           
+		                                 	  <button id='edit' type="button" class="btn bg-olive btn-xs" data-toggle="modal"  data-target="#editModal" plan="{{ plan.id }}" >修改</button>
                                               <button id="run" type="button" class="btn bg-olive btn-xs"  run_plan_id="{{ plan.id }}"  >运行</button>
                                           </td>
 			                          </tr>
@@ -167,6 +167,7 @@
             check: {
                 enable: true,
 
+
             },
             data: {
                 simpleData: {
@@ -176,7 +177,8 @@
             callback:{    //第一步
                 beforeCheck:true,
                 onClick:zTreeOnClick
-            }
+            },
+
 
 
         };
@@ -256,48 +258,43 @@
                    alert(data.msg)
                }
            })
-            $.ajaxSettings.async = true
+            $.ajaxSettings.async = true;
+           $(this).unbind('click');
 
        })
 
 
-    {#function checkedzTreeNodes() {#}
-	{#		var treeObj = $.fn.zTree.init($("#treeDemo"),setting,zNodes);#}
-	{#		var zTree = treeObj.getCheckedNodes(false); // 获取未被选中的shu#}
-	{#		var arr = new Array();#}
-	{#		var id= "";#}
-	{#		$.ajax({#}
-	{#			url : "/SyncData.do",#}
-	{#			type: "post",#}
-	{#			dataType : "json",#}
-	{#			async : false,#}
-	{#			success : function(data, textStatus) {#}
-	{#				if (data.result && data.code == 1) {#}
-	{#					id = data.ids;#}
-	{#				}#}
-	{#			},#}
-	{#			error : function(XMLHttpRequest, textStatus, errorThrown){#}
-	{#			}#}
-	{#		});#}
-	{#		if ( id!= "") {#}
-	{#			var idarr = id.split(",");#}
-	{#			for (var i = 0; i < zTree.length; i++) {#}
-	{#				for (var j = 0; j < idarr .length; j++) {#}
-	{#					if (idarr[j] == zTree[i].id) {#}
-	{#						arr.push(zTree[i]);#}
-	{#					}#}
-	{#				}#}
-	{#			}#}
-	{#			for (var l = 0; l < arr.length;l++){#}
-	{#				treeObj.expandNode(arr[l], true,true,true); //展开选中的#}
-	{#				treeObj.checkNode(arr[l], true,true);// 选中#}
-	{#			}#}
-	{#		}#}
-	{#	}#}
+    function checkedzTreeNodes(ids) {
+			var treeObj = $.fn.zTree.init($("#treeDemo"),setting,zNodes);
+			var zTree = treeObj.getCheckedNodes(false); // 获取未被选中的shu
+			var arr = new Array();
+			if (ids!= '') {
+				for (var i = 0; i < zTree.length; i++) {
+					for (var j = 0; j < ids .length; j++) {
+						if (ids[j] == zTree[i].id) {
+							arr.push(zTree[i]);
+						}
+					}
+				}
+				for (var l = 0; l < arr.length;l++){
+					treeObj.expandNode(arr[l], true,true,true); //展开选中的
+					treeObj.checkNode(arr[l], true,true);// 选中
+				}
+			}
+		}
 
 
-    {#$("[title='新建']").click(function () {#}
-    {#    getOptionList();#}
+    $("[title='新建']").click(function () {
+         getOptionList();
+         $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+         $('#planId').val('')
+         $('#name').val('')
+         $('#report').val('')
+         $('#remark').val('')
+         $('#module').val('')
+
+    })
+
 
    $('.text-center').children('#run').click(function () {
        plan = this.getAttribute('run_plan_id')
@@ -331,8 +328,34 @@
                alert("删除失败")
            }
        })
+       $.ajaxSettings.async = true;
+       $(this).unbind('click');
+   });
+
+   $('.text-center').children('#edit').click(function () {
+        pid = this.getAttribute('plan');
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        params = {'plan_id': pid, 'csrfmiddlewaretoken': csrf, }
+        $.ajaxSettings.async = false
+        $.post('/cases/plan_detail',params,function (data) {
+            if (data.status){
+                plan = data.plan
+                $('#planId').val(plan.id)
+                $('#name').val(plan.name)
+                $('#report').val(plan.report)
+                $('#remark').val(plan.remark)
+                $('#module').val(plan.module)
+                list = plan.cases_list
+                checkedzTreeNodes(list)
+            }else{
+                alert(data.msg)
+            }
+        })
        $.ajaxSettings.async = true
+
    })
+
+
 
     </SCRIPT>
 

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:Display="http://www.w3.org/1999/xhtml">
+{% load staticfiles %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>测试报告</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <link rel="stylesheet" href=" {% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/adminLTE/css/AdminLTE.css' %}">
+    <link rel="stylesheet" href=" {% static 'plugins/adminLTE/css/skins/_all-skins.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<script src="{% static 'plugins/jQuery/jquery-2.2.3.min.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+
+    
+</head>
+<body class="hold-transition skin-red sidebar-mini">
+  <!-- .box-body -->
+  {% csrf_token %}
+                    <div class="box-header with-border">
+                        <h3 class="box-title">测试报告</h3>
+                    </div>
+
+                    <div class="box-body">
+
+                        <!-- 数据表格 -->
+                        <div class="table-box">
+
+                            <!--工具栏-->
+{#                            <div class="pull-left">#}
+{#                                <div class="form-group form-inline">#}
+{#                                    <div class="btn-group">#}
+{#                                        <button type="button" class="btn btn-default" title="新建" data-toggle="modal" data-target="#editModal" ><i class="fa fa-file-o"></i> 新建</button>#}
+{#                                        <button type="button" class="btn btn-default" title="删除" ><i class="fa fa-trash-o"></i> 删除</button>#}
+{#										#}
+{#                                        <button type="button" class="btn btn-default" title="刷新" onclick="window.location.reload();"><i class="fa fa-refresh"></i> 刷新</button>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+                            <div class="box-tools pull-right">
+                                <div class="has-feedback">
+							                                         
+                                </div>
+                            </div>
+                            <!--工具栏/-->
+
+			                  <!--数据列表-->
+			                  <table id="dataList" class="table table-bordered table-striped table-hover dataTable">
+			                      <thead>
+			                          <tr>
+										  <th class="sorting_asc">ID</th>
+									      <th class="sorting">测试任务</th>
+                                          <th class="sorting">URL</th>
+					                      <th class="text-center">操作</th>
+			                          </tr>
+			                      </thead>
+			                      <tbody>
+
+                                  {% for report in report_list %}
+			                          <tr class="case">
+				                          <td class="field1">{{ report.id }}</td>
+									      <td class="field2">{{ report.plan }}</td>
+		                                  <td class="field3"><a href="{{ report.report_url}}" target="_blank">{{ report.report_url}}</a></td>
+		                                  <td class="text-center">                                           
+		                                 	  <button  type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal"  >下载</button>
+		                                  </td>
+
+			                          </tr>
+                                  {% endfor %}
+			                      </tbody>
+			                  </table>
+			                  <!--数据列表/-->                        
+							  
+							 
+                        </div>
+                        <!-- 数据表格 /-->
+
+                        
+                        
+                     </div>
+
+   <div class="pagenation">
+                    {% if cases_page.has_previous_page %}
+					<a href="{% url 'cases:case_list' cases_page.previous_page_number %}">上一页</a>
+                    {% endif %}
+                    {% for pindex in pages %}
+                        {% if pindex == cases_page.number %}
+					        <a href="{% url 'cases:case_list' pindex %}" class="active">{{ pindex }}</a>
+                        {% else %}
+					        <a href="{% url 'cases:case_list' pindex %}">{{ pindex }}</a>
+                        {% endif %}
+					{% endfor %}
+                    {% if cases_page.has_next_page %}
+					<a href="{% url 'cases:case_list' cases_page.next_page_number %}">下一页></a>
+                    {% endif %}
+				</div>
+                    <!-- /.box-body -->
+{#         #}
+{#<!-- 编辑窗口 -->#}
+{#<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">#}
+{#  <div class="modal-dialog" >#}
+{#	<div class="modal-content">#}
+{#		<div class="modal-header">#}
+{#			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>#}
+{#			<h3 id="myModalLabel">用例编辑</h3>#}
+{#		</div>#}
+{#		<div class="modal-body">		#}
+{#			<table class="table table-bordered table-striped"  width="800px" >#}
+{#                <tr style="display:none;">#}
+{#		      		<td>用例ID</td>#}
+{#		      		<td><input id="caseid" class="form-control" placeholder="用例ID" >  </td>#}
+{#		      	</tr>#}
+{#		      	<tr>#}
+{#		      		<td>模块名称</td>#}
+{#		      		<td><input id="name" class="form-control" placeholder="模块名称" >  </td>#}
+{#		      	</tr>		      	#}
+{#		      	<tr>#}
+{#		      		<td>类名</td>#}
+{#		      		<td><input  id="clazz" class="form-control" placeholder="类名">  </td>#}
+{#		      	</tr>#}
+{#                <tr>#}
+{#		      		<td>方法名</td>#}
+{#		      		<td><input id="method" class="form-control" placeholder="方法名">  </td>#}
+{#		      	</tr>#}
+{#                <tr>#}
+{#		      		<td>备注</td>#}
+{#		      		<td><input id="remark" class="form-control" placeholder="备注">  </td>#}
+{#		      	</tr>#}
+{#			 </table>#}
+{#		</div>#}
+{#		<div class="modal-footer">						#}
+{#			<button class="btn btn-success" data-dismiss="modal" aria-hidden="true">保存</button>#}
+{#			<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>#}
+{#		</div>#}
+{#	  </div>#}
+{#	</div>#}
+{#</div>#}
+{##}
+{#<script>#}
+{#    $("[title='新建']").click(function () {#}
+{#         $('#caseid').val('')#}
+{#        $('#name').val('')#}
+{#        $('#clazz').val('')#}
+{#        $('#method').val('')#}
+{#        $('#remark').val('')#}
+{#    });#}
+{##}
+{#    $('.case').children('.text-center').children('button').click(function () {#}
+{#        $('#caseid').val($(this).parents('tr').find('.field1').text())#}
+{#        $('#name').val($(this).parents('tr').find('.field2').text())#}
+{#        $('#clazz').val($(this).parents('tr').find('.field3').text())#}
+{#        $('#method').val($(this).parents('tr').find('.field4').text())#}
+{#        $('#remark').val($(this).parents('tr').find('.field5').text())#}
+{#    });#}
+{#    $('.modal-footer').children('.btn-success').click(function () {#}
+{##}
+{#        csrf = $('input[name="csrfmiddlewaretoken"]').val()#}
+{#        params = {'id': $('#caseid').val(),#}
+{#                  'module': $('#name').val(),#}
+{#                  'clazz':$('#clazz').val(),#}
+{#                  'method': $('#method').val(),#}
+{#                  'remark': $('#remark').val(),#}
+{#            'csrfmiddlewaretoken': csrf,#}
+{#        }#}
+{#        $.ajaxSettings.async = false#}
+{##}
+{#        $.post('/cases/save',params,function (data) {#}
+{#            if (data.status){#}
+{#                window.location.reload()#}
+{#            }else {#}
+{#                alert(date.msg)#}
+{#            }#}
+{#        })#}
+{##}
+{#        $.ajaxSettings.async = true;#}
+{#        $(this).unbind('click');#}
+{#    })#}
+{##}
+{#</script>#}
+   
+</body>
+</html>

@@ -17,7 +17,7 @@ from django.conf.urls import url
 
 
 from cases.views import IndexView, HomeView, CaseListView, PlanListView, SaveCaseView, OptionlistView, \
-    CreateTestPlanView, RunPlanView
+    CreateTestPlanView, RunPlanView, DelPlanView, PlanDetailView, TestReportView, SaveReportView
 
 urlpatterns = [
     url(r'^index$', IndexView.as_view(), name='index'),
@@ -27,6 +27,10 @@ urlpatterns = [
     url(r'^save$', SaveCaseView.as_view(), name='save'),
     url(r'^option_list$', OptionlistView.as_view(), name='option'),
     url(r'^create_plan$', CreateTestPlanView.as_view(), name='create_plan'),
-    url(r'^run_plan/(?P<planid>\d+)$', RunPlanView.as_view(), name='run_plan'),
+    url(r'^run_plan/(?P<plan_id>\d+)$', RunPlanView.as_view(), name='run_plan'),
+    url(r'^del_plan$', DelPlanView.as_view(), name='del_plan'),
+    url(r'^plan_detail$', PlanDetailView.as_view(), name='plan_detail'),
+    url(r'^report_list/(?P<page>\d+)$', TestReportView.as_view(), name='report_list'),
+    url(r'^create_report$', SaveReportView.as_view(), name='save_report'),
 
 ]

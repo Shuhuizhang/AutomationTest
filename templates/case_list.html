@@ -63,7 +63,7 @@
 			                      </thead>
 			                      <tbody>
 
-                                  {% for case in case_list %}
+                                  {% for case in cases_page %}
 			                          <tr class="case">
 			                              <td><input  type="checkbox" ></td>			                              
 				                          <td class="field1">{{ case.id }}</td>
@@ -90,18 +90,18 @@
                      </div>
 
    <div class="pagenation">
-                    {% if order_page.has_previous_page %}
-					<a href="{% url 'cases:case_list' order_page.previous_page_number %}">上一页</a>
+                    {% if cases_page.has_previous_page %}
+					<a href="{% url 'cases:case_list' cases_page.previous_page_number %}">上一页</a>
                     {% endif %}
                     {% for pindex in pages %}
-                        {% if pindex == order_page.number %}
+                        {% if pindex == cases_page.number %}
 					        <a href="{% url 'cases:case_list' pindex %}" class="active">{{ pindex }}</a>
                         {% else %}
 					        <a href="{% url 'cases:case_list' pindex %}">{{ pindex }}</a>
                         {% endif %}
 					{% endfor %}
-                    {% if order_page.has_next_page %}
-					<a href="{% url 'cases:case_list' order_page.next_page_number %}">下一页></a>
+                    {% if cases_page.has_next_page %}
+					<a href="{% url 'cases:case_list' cases_page.next_page_number %}">下一页></a>
                     {% endif %}
 				</div>
                     <!-- /.box-body -->
@@ -182,7 +182,8 @@
             }
         })
 
-        $.ajaxSettings.async = true
+        $.ajaxSettings.async = true;
+        $(this).unbind('click');
     })
 
 </script>

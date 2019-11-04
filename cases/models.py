@@ -43,5 +43,11 @@ class Caseplan(BaseModel):
         verbose_name_plural = verbose_name
 
 
-# class Report(BaseModel):
-#     plan_id = models.ForeignKey('cases.Testplan', verbose_name='测试任务ID')
+class Report(BaseModel):
+    plan_id = models.IntegerField(max_length=20, verbose_name='测试任务ID')
+    report_url = models.CharField(max_length=500, null=True, verbose_name="报告地址")
+
+    class Meta:
+        db_table = 'tb_plan_report'
+        verbose_name = '测试报告'
+        verbose_name_plural = verbose_name
