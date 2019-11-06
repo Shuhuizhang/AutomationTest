@@ -44,7 +44,7 @@ class Caseplan(BaseModel):
 
 
 class Report(BaseModel):
-    plan_id = models.IntegerField(max_length=20, verbose_name='测试任务ID')
+    plan_id = models.IntegerField(verbose_name='测试任务ID')
     report_url = models.CharField(max_length=500, null=True, verbose_name="报告地址")
 
     class Meta:

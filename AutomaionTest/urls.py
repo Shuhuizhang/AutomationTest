@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user/', include(('user.urls', 'user'), namespace='user')),  # 用户模块
     url(r'^cases/', include(('cases.urls', 'cases'), namespace='cases')),  # 用例模块
+    url(r'^', include(('cases.urls', 'cases'), namespace='cases'))
 ]
