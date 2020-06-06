@@ -1,5 +1,5 @@
 requests==2.18.4
 PyMySQL==0.8.1
-Django==2.2.4
+Django==2.2.13
 
 
